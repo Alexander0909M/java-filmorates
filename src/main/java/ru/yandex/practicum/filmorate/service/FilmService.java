@@ -39,17 +39,12 @@ public class FilmService {
     }
 
     public Film updateFilm(Film film) {
-        if (film.getId() == 0) {
+        if (film.getId() == 0 || filmStorage.findById(film.getId()) == null) {
             throw new NotFoundException("Фильм с id " + film.getId() + " не найден");
         }
-
-        Film existingFilm = filmStorage.findById(film.getId());
-        if (existingFilm == null) {
-            throw new NotFoundException("Фильм с id " + film.getId() + " не найден");
-        }
-
+        Film existing = filmStorage.findById(film.getId());
         FilmValidator.validate(film);
-        film.setLikes(existingFilm.getLikes());
+        film.setLikes(existing.getLikes());
         return filmStorage.update(film);
     }
 
@@ -59,6 +54,7 @@ public class FilmService {
             throw new NotFoundException("Пользователь с id " + userId + " не найден");
         }
         film.getLikes().add(userId);
+        filmStorage.update(film);
         return film;
     }
 
@@ -68,12 +64,14 @@ public class FilmService {
             throw new NotFoundException("Пользователь с id " + userId + " не найден");
         }
         film.getLikes().remove(userId);
+        filmStorage.update(film);
         return film;
     }
 
     public List<Film> getPopularFilms(int count) {
         return filmStorage.findAll().stream()
-                .sorted(Comparator.comparingInt((Film f) -> f.getLikes().size()).reversed())
+                .sorted(Comparator.comparingInt((Film f) -> f.getLikes().size()).reversed()
+                        .thenComparingInt(Film::getId))
                 .limit(count)
                 .collect(Collectors.toList());
     }

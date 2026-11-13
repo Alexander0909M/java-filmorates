@@ -11,7 +11,7 @@ import java.util.Map;
 @Component
 public class InMemoryUserStorage implements UserStorage {
     private final Map<Integer, User> users = new HashMap<>();
-    private int currentId = 1;
+    private int nextId = 1;
 
     @Override
     public List<User> findAll() {
@@ -25,7 +25,7 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User create(User user) {
-        user.setId(currentId++);
+        user.setId(nextId++);
         users.put(user.getId(), user);
         return user;
     }

@@ -32,61 +32,58 @@ public class UserService {
 
     public User createUser(User user) {
         UserValidator.validate(user);
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
         return userStorage.create(user);
     }
 
     public User updateUser(User user) {
-        if (user.getId() == 0) {
+        if (user.getId() == 0 || userStorage.findById(user.getId()) == null) {
             throw new NotFoundException("Пользователь с id " + user.getId() + " не найден");
         }
-
-        User existingUser = userStorage.findById(user.getId());
-        if (existingUser == null) {
-            throw new NotFoundException("Пользователь с id " + user.getId() + " не найден");
-        }
-
         UserValidator.validate(user);
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
-
-        user.setFriends(existingUser.getFriends());
         return userStorage.update(user);
     }
 
     public User addFriend(int userId, int friendId) {
         User user = getUserById(userId);
         User friend = getUserById(friendId);
+
         user.getFriends().add(friendId);
         friend.getFriends().add(userId);
+
+        userStorage.update(user);
+        userStorage.update(friend);
         return user;
     }
 
     public User removeFriend(int userId, int friendId) {
         User user = getUserById(userId);
         User friend = getUserById(friendId);
+
         user.getFriends().remove(friendId);
         friend.getFriends().remove(userId);
+
+        userStorage.update(user);
+        userStorage.update(friend);
         return user;
     }
 
     public List<User> getFriends(int userId) {
         User user = getUserById(userId);
-        Set<Integer> friendIds = user.getFriends();
-        return friendIds.stream()
-                .map(this::getUserById)
+        return user.getFriends().stream()
+                .map(userStorage::findById)
                 .collect(Collectors.toList());
     }
 
-    public List<User> getCommonFriends(int userId, int otherId) {
+    public List<User> getCommonFriends(int userId, int otherUserId) {
         User user = getUserById(userId);
-        User other = getUserById(otherId);
-        return user.getFriends().stream()
-                .filter(other.getFriends()::contains)
-                .map(this::getUserById)
+        User otherUser = getUserById(otherUserId);
+
+        Set<Integer> commonIds = user.getFriends().stream()
+                .filter(otherUser.getFriends()::contains)
+                .collect(Collectors.toSet());
+
+        return commonIds.stream()
+                .map(userStorage::findById)
                 .collect(Collectors.toList());
     }
 }
