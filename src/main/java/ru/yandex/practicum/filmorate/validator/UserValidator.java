@@ -3,14 +3,24 @@ package ru.yandex.practicum.filmorate.validator;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
+import java.time.LocalDate;
+
 public class UserValidator {
 
     public static void validate(User user) {
-        if (user.getEmail() == null || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
+        if (user.getEmail() == null || user.getEmail().isBlank()) {
+            throw new ValidationException("Email не может быть пустым");
+        }
+
+        if (!user.getEmail().contains("@")) {
             throw new ValidationException("Email должен содержать символ @");
         }
 
-        if (user.getLogin() == null || user.getLogin().isBlank() || user.getLogin().contains(" ")) {
+        if (user.getLogin() == null || user.getLogin().isBlank()) {
+            throw new ValidationException("Логин не может быть пустым");
+        }
+
+        if (user.getLogin().contains(" ")) {
             throw new ValidationException("Логин не может содержать пробелы");
         }
 
@@ -18,7 +28,7 @@ public class UserValidator {
             throw new ValidationException("Дата рождения не может быть пустой");
         }
 
-        if (user.getBirthday().isAfter(java.time.LocalDate.now())) {
+        if (user.getBirthday().isAfter(LocalDate.now())) {
             throw new ValidationException("Дата рождения не может быть в будущем");
         }
 
