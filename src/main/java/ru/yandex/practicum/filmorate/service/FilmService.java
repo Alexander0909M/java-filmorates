@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -28,7 +28,7 @@ public class FilmService {
     public Film getFilmById(int id) {
         Film film = filmStorage.findById(id);
         if (film == null) {
-            throw new ValidationException("Фильм с id " + id + " не найден");
+            throw new NotFoundException("Фильм с id " + id + " не найден");
         }
         return film;
     }
@@ -40,10 +40,10 @@ public class FilmService {
 
     public Film updateFilm(Film film) {
         if (film.getId() == 0) {
-            throw new ValidationException("Id должен быть указан");
+            throw new NotFoundException("Фильм с id " + film.getId() + " не найден");
         }
         if (filmStorage.findById(film.getId()) == null) {
-            throw new ValidationException("Фильм с id " + film.getId() + " не найден");
+            throw new NotFoundException("Фильм с id " + film.getId() + " не найден");
         }
         FilmValidator.validate(film);
         return filmStorage.update(film);
@@ -52,7 +52,7 @@ public class FilmService {
     public Film addLike(int filmId, int userId) {
         Film film = getFilmById(filmId);
         if (userStorage.findById(userId) == null) {
-            throw new ValidationException("Пользователь с id " + userId + " не найден");
+            throw new NotFoundException("Пользователь с id " + userId + " не найден");
         }
         film.getLikes().add(userId);
         return film;
@@ -61,7 +61,7 @@ public class FilmService {
     public Film removeLike(int filmId, int userId) {
         Film film = getFilmById(filmId);
         if (userStorage.findById(userId) == null) {
-            throw new ValidationException("Пользователь с id " + userId + " не найден");
+            throw new NotFoundException("Пользователь с id " + userId + " не найден");
         }
         film.getLikes().remove(userId);
         return film;
