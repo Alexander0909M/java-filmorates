@@ -42,13 +42,18 @@ public class UserService {
         if (user.getId() == 0) {
             throw new NotFoundException("Пользователь с id " + user.getId() + " не найден");
         }
-        if (userStorage.findById(user.getId()) == null) {
+
+        User existingUser = userStorage.findById(user.getId());
+        if (existingUser == null) {
             throw new NotFoundException("Пользователь с id " + user.getId() + " не найден");
         }
+
         UserValidator.validate(user);
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
+
+        user.setFriends(existingUser.getFriends());
         return userStorage.update(user);
     }
 

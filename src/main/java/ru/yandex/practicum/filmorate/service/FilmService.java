@@ -42,10 +42,14 @@ public class FilmService {
         if (film.getId() == 0) {
             throw new NotFoundException("Фильм с id " + film.getId() + " не найден");
         }
-        if (filmStorage.findById(film.getId()) == null) {
+
+        Film existingFilm = filmStorage.findById(film.getId());
+        if (existingFilm == null) {
             throw new NotFoundException("Фильм с id " + film.getId() + " не найден");
         }
+
         FilmValidator.validate(film);
+        film.setLikes(existingFilm.getLikes());
         return filmStorage.update(film);
     }
 
